@@ -28,7 +28,22 @@ def scaffold_project(topic: str, folder_name: str, out_dir: Path) -> Path:
         raise SystemExit(f"Destination already exists: {dest_dir}")
 
     template_dir = get_template_dir()
-    shutil.copytree(template_dir, dest_dir)
+    ignore = shutil.ignore_patterns(
+        "*.aux",
+        "*.bbl",
+        "*.blg",
+        "*.fdb_latexmk",
+        "*.fls",
+        "*.lof",
+        "*.log",
+        "*.lot",
+        "*.out",
+        "*.synctex",
+        "*.synctex.gz",
+        "*.toc",
+        "main.template.pdf",
+    )
+    shutil.copytree(template_dir, dest_dir, ignore=ignore)
 
     main_template = dest_dir / "main.template.tex"
     bib_template = dest_dir / "references.template.bib"
