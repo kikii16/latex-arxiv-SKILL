@@ -311,3 +311,6 @@ TSWLatexianTemp*
 ## Python
 __pycache__/
 *.py[cod]
+
+
+main.template.pdf
