@@ -405,7 +405,9 @@ def upsert_work(conn: sqlite3.Connection, work: dict[str, Any]) -> int:
 
     # Replace authors to preserve ordering (simplest and deterministic).
     conn.execute("DELETE FROM work_authors WHERE work_id = ?;", (work_id,))
-    for pos, name in enumerate(work.get("authors") or []):
+    seen_author_ids: set[int] = set()
+    pos = 0
+    for name in work.get("authors") or []:
         conn.execute(
             "INSERT INTO authors(name) VALUES(?) ON CONFLICT(name) DO NOTHING;",
             (name,),
@@ -414,10 +416,14 @@ def upsert_work(conn: sqlite3.Connection, work: dict[str, Any]) -> int:
         if author_row is None:
             raise RuntimeError("author insert/select failed")
         author_id = int(author_row["author_id"])
+        if author_id in seen_author_ids:
+            continue
+        seen_author_ids.add(author_id)
         conn.execute(
             "INSERT INTO work_authors(work_id, author_id, position) VALUES(?, ?, ?);",
             (work_id, author_id, pos),
         )
+        pos += 1
     return work_id
 
 
